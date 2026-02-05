@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "geradorLayout",
+    "description": "API REST para gerenciamento e geração de registros posicionais (layouts CNAB, etc.)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Layouts – CRUD",
+      "item": [
+        {
+          "name": "Criar layout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Layout CNAB 240\",\n  \"descricao\": \"Layout de retorno CNAB 240 caracteres\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false\n    }\n  ]\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar todos os layouts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/layouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar layout por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/layouts/{{layoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "{{layoutId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar layout por nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/layouts/nome/{{layoutNome}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "nome", "{{layoutNome}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar layout",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Layout CNAB 240 – atualizado\",\n  \"descricao\": \"Descrição atualizada\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false\n    }\n  ]\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/{{layoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "{{layoutId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar layout",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/layouts/{{layoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "{{layoutId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Geração de registro",
+      "item": [
+        {
+          "name": "Gerar registro por ID do layout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/gerar-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "gerar-registro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Gerar registro por nome do layout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeLayout\": \"Layout CNAB 240\",\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/gerar-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "gerar-registro"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "layoutId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "layoutNome",
+      "value": "Layout CNAB 240",
+      "type": "string"
+    }
+  ]
+}
