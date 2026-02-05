@@ -31,6 +31,9 @@ public class Campo {
     @Column(nullable = false)
     private boolean obrigatorio;
 
+    @Column(name = "valor_default", length = 500)
+    private String valorDefault;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "layout_id", nullable = false)
     @JsonBackReference
@@ -90,6 +93,14 @@ public class Campo {
 
     public void setObrigatorio(boolean obrigatorio) {
         this.obrigatorio = obrigatorio;
+    }
+
+    public String getValorDefault() {
+        return valorDefault;
+    }
+
+    public void setValorDefault(String valorDefault) {
+        this.valorDefault = valorDefault;
     }
 
     public Layout getLayout() {

@@ -86,7 +86,8 @@ Content-Type: application/json
       "posicaoFinal": 7,
       "tipo": "NUMERICO",
       "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true
+      "obrigatorio": true,
+      "valorDefault": "0"
     },
     {
       "nome": "tipoRegistro",
@@ -94,7 +95,8 @@ Content-Type: application/json
       "posicaoFinal": 8,
       "tipo": "NUMERICO",
       "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true
+      "obrigatorio": true,
+      "valorDefault": "0"
     },
     {
       "nome": "nomeEmpresa",
@@ -223,6 +225,112 @@ Content-Type: application/json
 
 ---
 
+### 5. Exemplo com valorDefault
+
+Os campos `loteServico` e `tipoRegistro` têm `valorDefault` definido no layout.
+Omitindo-os da requisição, o default é aplicado automaticamente:
+
+```http
+POST /api/layouts/gerar-registro
+Content-Type: application/json
+
+{
+  "nomeLayout": "CNAB240_HeaderArquivo",
+  "valores": {
+    "codigoBanco": "341",
+    "nomeEmpresa": "EMPRESA TESTE LTDA"
+  }
+}
+```
+
+**Resposta (200 OK):** `loteServico` e `tipoRegistro` recebem `"0"` pelo default.
+O campo `valorOriginal` na resposta mostra o valor efetivo utilizado (fornecido pelo cliente ou aplicado pelo default).
+
+```json
+{
+  "registroGerado": "34100000EMPRESA TESTE LTDA            ",
+  "campos": [
+    { "nome": "codigoBanco",  "posicao": "1-3",  "valorOriginal": "341", "valorFormatado": "341"  },
+    { "nome": "loteServico",  "posicao": "4-7",  "valorOriginal": "0",   "valorFormatado": "0000" },
+    { "nome": "tipoRegistro", "posicao": "8-8",  "valorOriginal": "0",   "valorFormatado": "0"    },
+    { "nome": "nomeEmpresa",  "posicao": "9-38", "valorOriginal": "EMPRESA TESTE LTDA", "valorFormatado": "EMPRESA TESTE LTDA            " }
+  ],
+  "tamanhoTotal": 38
+}
+```
+
+---
+
+### 6. Exemplo de erro — campo desconhecido
+
+Qualquer chave no map `valores` que não corresponda a um campo do layout é rejeitada — previne typos silenciosos:
+
+```http
+POST /api/layouts/gerar-registro
+Content-Type: application/json
+
+{
+  "nomeLayout": "CNAB240_HeaderArquivo",
+  "valores": {
+    "codigoBanco": "341",
+    "loteServico": "1",
+    "tipoRegistro": "0",
+    "nomeEmpresa": "TESTE",
+    "campo_inexistente": "valor"
+  }
+}
+```
+
+**Resposta (400 Bad Request):**
+
+```json
+{
+  "titulo": "Erro de validação",
+  "erro": "Campos não encontrados no layout: [campo_inexistente]. Campos disponíveis: [codigoBanco, loteServico, nomeEmpresa, tipoRegistro].",
+  "status": 400,
+  "timestamp": "..."
+}
+```
+
+---
+
+### 7. Exemplo de erro — valorDefault inválido na definição do layout
+
+O `valorDefault` é validado contra tamanho e tipo no momento da criação ou atualização do layout:
+
+```http
+POST /api/layouts
+Content-Type: application/json
+
+{
+  "nome": "LayoutTeste",
+  "campos": [
+    {
+      "nome": "codigo",
+      "posicaoInicial": 1,
+      "posicaoFinal": 3,
+      "tipo": "NUMERICO",
+      "preenchimento": "ZERO_ESQUERDA",
+      "obrigatorio": true,
+      "valorDefault": "abc"
+    }
+  ]
+}
+```
+
+**Resposta (400 Bad Request):**
+
+```json
+{
+  "titulo": "Erro de validação",
+  "erro": "Campo 'codigo': valorDefault 'abc' é inválido para tipo NUMERICO (apenas dígitos 0-9).",
+  "status": 400,
+  "timestamp": "..."
+}
+```
+
+---
+
 ## Tipos de dado
 
 | Tipo          | Aceita                        | Exemplo         |
@@ -242,8 +350,11 @@ Content-Type: application/json
 ## Validações implementadas
 
 - **Tamanho do campo:** valor maior que o permitido → 400
-- **Tipo de dado:** letra em campo NUMERICO → 400
-- **Campo obrigatório:** ausente ou vazio → 400
+- **Tipo de dado:** letra em campo NUMERICO, string não-numérica em DECIMAL → 400
+- **Campo obrigatório:** ausente ou vazio e sem `valorDefault` configurado → 400
+- **Campo desconhecido:** chave no map `valores` que não existe no layout → 400
+- **valorDefault:** validado contra tamanho e tipo na criação/atualização do layout → 400
+- **DECIMAL negativo com ZERO_ESQUERDA:** preenchimento com zero à esquerda não aceita valores negativos → 400
 - **Sobreposição de posições:** campos com posições que se sobrepõem ao criar/atualizar layout → 400
 - **Posições válidas:** `posicaoInicial` deve ser ≤ `posicaoFinal` e ≥ 1 → 400
 - **Nome único:** dois layouts com o mesmo nome → 400

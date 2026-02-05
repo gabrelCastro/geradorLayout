@@ -126,14 +126,16 @@ public class LayoutService {
                 .collect(Collectors.toList());
 
         // --- validações ---
-        validarCamposObrigatorios(campos, valores);
+        validarCamposDesconhecidos(campos, valores);
+        Map<String, String> valoresEfetivos = aplicarDefaults(campos, valores);
+        validarCamposObrigatorios(campos, valoresEfetivos);
 
         // --- formatar cada campo e montar infos de resposta ---
         Map<String, String> valoresFormatados = new LinkedHashMap<>();
         List<CampoInfoResponse> campoInfos   = new ArrayList<>();
 
         for (Campo campo : campos) {
-            String valorOriginal = valores.getOrDefault(campo.getNome(), "");
+            String valorOriginal = valoresEfetivos.get(campo.getNome());
 
             validarTamanho(campo, valorOriginal);
             validarTipoDado(campo, valorOriginal);
@@ -279,6 +281,7 @@ public class LayoutService {
                         "Campo '" + campo.getNome() + "': posicaoInicial (" + campo.getPosicaoInicial()
                                 + ") deve ser <= posicaoFinal (" + campo.getPosicaoFinal() + ").");
             }
+            validarValorDefault(campo);
         }
 
         // sobreposição — ordena por posicaoInicial e compara com o anterior
@@ -299,6 +302,50 @@ public class LayoutService {
         }
     }
 
+    /**
+     * Valida o {@code valorDefault} do campo contra tamanho e tipo.
+     * Mensagens diferenciadas das validações de geração para deixar claro
+     * que é o default da definição do layout que não está certo.
+     */
+    private void validarValorDefault(Campo campo) {
+        String vd = campo.getValorDefault();
+        if (vd == null || vd.isBlank()) {
+            return;
+        }
+
+        if (vd.length() > campo.getTamanho()) {
+            throw new ValidationException(
+                    "Campo '" + campo.getNome() + "': valorDefault excede o tamanho do campo ("
+                            + vd.length() + " de " + campo.getTamanho() + " caractere(s)). Valor: '" + vd + "'.");
+        }
+
+        switch (campo.getTipo()) {
+            case NUMERICO -> {
+                if (!vd.matches("\\d+")) {
+                    throw new ValidationException(
+                            "Campo '" + campo.getNome() + "': valorDefault '" + vd
+                                    + "' é inválido para tipo NUMERICO (apenas dígitos 0-9).");
+                }
+            }
+            case DECIMAL -> {
+                try {
+                    BigDecimal bd = new BigDecimal(vd);
+                    if (campo.getPreenchimento() == TipoPreenchimento.ZERO_ESQUERDA && bd.signum() < 0) {
+                        throw new ValidationException(
+                                "Campo '" + campo.getNome() + "': valorDefault '" + vd
+                                        + "' é inválido — tipo DECIMAL com ZERO_ESQUERDA não aceita negativos.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new ValidationException(
+                            "Campo '" + campo.getNome() + "': valorDefault '" + vd + "' é inválido para tipo DECIMAL.");
+                }
+            }
+            case ALFANUMERICO -> {
+                // qualquer string é válida
+            }
+        }
+    }
+
     private void validarRequest(GerarRegistroRequest request) {
         if (request.idLayout() == null && (request.nomeLayout() == null || request.nomeLayout().isBlank())) {
             throw new ValidationException("É necessário fornecer idLayout ou nomeLayout na requisição.");
@@ -314,6 +361,25 @@ public class LayoutService {
                 .orElseThrow(() -> new NotFoundException("Layout com nome '" + request.nomeLayout() + "' não encontrado."));
     }
 
+    /**
+     * Constrói o map efetivo de valores: para cada campo do layout, usa o valor
+     * fornecido pelo cliente quando presente e não-nulo; caso contrário aplica o
+     * {@code valorDefault} do campo (se configurado).  Valores explicitamente
+     * enviados como {@code ""} preservam a string vazia — o default não substitui.
+     */
+    private Map<String, String> aplicarDefaults(List<Campo> campos, Map<String, String> valores) {
+        Map<String, String> resultado = new LinkedHashMap<>();
+        for (Campo campo : campos) {
+            String valor = valores.get(campo.getNome());
+            if (valor == null && campo.getValorDefault() != null && !campo.getValorDefault().isBlank()) {
+                resultado.put(campo.getNome(), campo.getValorDefault());
+            } else {
+                resultado.put(campo.getNome(), Objects.requireNonNullElse(valor, ""));
+            }
+        }
+        return resultado;
+    }
+
     private void validarCamposObrigatorios(List<Campo> campos, Map<String, String> valores) {
         for (Campo campo : campos) {
             if (campo.isObrigatorio()) {
@@ -323,6 +389,23 @@ public class LayoutService {
                             "Campo obrigatório não fornecido ou vazio: '" + campo.getNome() + "'.");
                 }
             }
+        }
+    }
+
+    private void validarCamposDesconhecidos(List<Campo> campos, Map<String, String> valores) {
+        Set<String> nomesCampos = campos.stream()
+                .map(Campo::getNome)
+                .collect(Collectors.toSet());
+
+        List<String> desconhecidos = valores.keySet().stream()
+                .filter(nome -> !nomesCampos.contains(nome))
+                .sorted()
+                .toList();
+
+        if (!desconhecidos.isEmpty()) {
+            throw new ValidationException(
+                    "Campos não encontrados no layout: " + desconhecidos
+                            + ". Campos disponíveis: " + nomesCampos.stream().sorted().toList() + ".");
         }
     }
 
@@ -350,7 +433,12 @@ public class LayoutService {
             }
             case DECIMAL -> {
                 try {
-                    new BigDecimal(valor);
+                    BigDecimal bd = new BigDecimal(valor);
+                    if (campo.getPreenchimento() == TipoPreenchimento.ZERO_ESQUERDA && bd.signum() < 0) {
+                        throw new ValidationException(
+                                "Campo '" + campo.getNome() + "' é do tipo DECIMAL com preenchimento ZERO_ESQUERDA "
+                                        + "e não aceita valores negativos. Valor fornecido: '" + valor + "'.");
+                    }
                 } catch (NumberFormatException e) {
                     throw new ValidationException(
                             "Campo '" + campo.getNome() + "' é do tipo DECIMAL e aceita apenas números decimais. "
@@ -375,6 +463,7 @@ public class LayoutService {
         campo.setTipo(dto.tipo());
         campo.setPreenchimento(dto.preenchimento());
         campo.setObrigatorio(dto.obrigatorio());
+        campo.setValorDefault(dto.valorDefault());
         return campo;
     }
 }

@@ -17,7 +17,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Layout CNAB 240\",\n  \"descricao\": \"Layout de retorno CNAB 240 caracteres\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false\n    }\n  ]\n}",
+              "raw": "{\n  \"nome\": \"Layout CNAB 240\",\n  \"descricao\": \"Layout de retorno CNAB 240 caracteres\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true,\n      \"valorDefault\": \"0\"\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false,\n      \"valorDefault\": \"EMPRESA PADRAO\"\n    }\n  ]\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -76,7 +76,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Layout CNAB 240 – atualizado\",\n  \"descricao\": \"Descrição atualizada\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false\n    }\n  ]\n}",
+              "raw": "{\n  \"nome\": \"Layout CNAB 240 – atualizado\",\n  \"descricao\": \"Descrição atualizada\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true,\n      \"valorDefault\": \"0\"\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false,\n      \"valorDefault\": \"EMPRESA PADRAO\"\n    }\n  ]\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -135,6 +135,46 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nomeLayout\": \"Layout CNAB 240\",\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/gerar-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "gerar-registro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Gerar registro usando defaults",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_banco\": \"341\"\n  }\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/gerar-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "gerar-registro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Erro – campo desconhecido no layout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\",\n    \"campo_inexistente\": \"valor\"\n  }\n}",
               "options": { "language": "json" }
             },
             "url": {

@@ -9,5 +9,6 @@ public record CampoDTO(
         int posicaoFinal,
         TipoDado tipo,
         TipoPreenchimento preenchimento,
-        boolean obrigatorio
+        boolean obrigatorio,
+        String valorDefault
 ) {}
