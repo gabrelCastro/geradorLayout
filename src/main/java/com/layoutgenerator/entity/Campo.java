@@ -35,9 +35,9 @@ public class Campo {
     private String valorDefault;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "layout_id", nullable = false)
-    @JsonBackReference
-    private Layout layout;
+    @JoinColumn(name = "registro_id", nullable = false)
+    @JsonBackReference("registro-campos")
+    private Registro registro;
 
     public Long getId() {
         return id;
@@ -103,15 +103,14 @@ public class Campo {
         this.valorDefault = valorDefault;
     }
 
-    public Layout getLayout() {
-        return layout;
+    public Registro getRegistro() {
+        return registro;
     }
 
-    public void setLayout(Layout layout) {
-        this.layout = layout;
+    public void setRegistro(Registro registro) {
+        this.registro = registro;
     }
 
-    /** Retorna o tamanho do campo em caracteres (1-based, inclusive). */
     public int getTamanho() {
         return posicaoFinal - posicaoInicial + 1;
     }

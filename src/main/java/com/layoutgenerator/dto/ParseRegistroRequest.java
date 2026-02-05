@@ -1,11 +1,9 @@
 package com.layoutgenerator.dto;
 
-import java.util.Map;
-
-public record GerarRegistroRequest(
+public record ParseRegistroRequest(
         Long idLayout,
         String nomeLayout,
         Long idRegistro,
         String nomeRegistro,
-        Map<String, String> valores
+        String registro
 ) {}

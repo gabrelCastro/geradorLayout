@@ -1,36 +1,80 @@
 # Layout Generator
 
-API REST Spring Boot para gerenciamento e geração de registros a partir de layouts posicionais (CNAB, meios de pagamento, etc).
+API REST Spring Boot + Frontend React para gerenciamento e geração de registros a partir de layouts posicionais (CNAB, meios de pagamento, etc).
 
-A geração de registros utiliza a biblioteca **uniVocity-parsers** (`FixedWidthWriter`) para montar os campos com o alinhamento e padding corretos por campo.
+A geração de registros utiliza a biblioteca **uniVocity-parsers** (`FixedWidthWriter`) para montar os campos com o alinhamento e padding corretos.
+
+Suporta **importação automática de layouts** a partir de PDFs usando **OpenAI GPT-4**.
+
+---
+
+## Arquitetura
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Frontend     │────▶│    Backend      │────▶│   PostgreSQL    │
+│  React + MUI    │     │  Spring Boot    │     │                 │
+│   :3000         │     │   :8080         │     │   :5432         │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+---
+
+## Estrutura do Layout
+
+```
+Layout (ex: CNAB 240)
+  └── Registro (ex: Header, Detalhe, Trailer)
+        └── Campo (posição, tipo, preenchimento)
+```
+
+Um layout pode ter múltiplos tipos de registro, cada um com seus próprios campos.
 
 ---
 
 ## Pré-requisitos
 
+### Com Docker (recomendado)
+
+| Ferramenta      | Versão mínima |
+|-----------------|---------------|
+| Docker          | 20+           |
+| Docker Compose  | 2.0+          |
+
+### Sem Docker
+
 | Ferramenta   | Versão mínima |
 |-------------|---------------|
-| Java        | 17            |
+| Java        | 21            |
 | Maven       | 3.8+          |
 | PostgreSQL  | 14+           |
+| Node.js     | 18+ (para o frontend) |
 
 ---
 
-## Configuração do banco de dados
+## Configuração
 
-1. Crie o banco `layoutgenerator`:
+### Execução local
+
+1. Copie o arquivo de configuração:
+
+```bash
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+```
+
+2. Crie o banco `layoutgenerator`:
 
 ```sql
 CREATE DATABASE layoutgenerator;
 ```
 
-2. Ajuste usuário e senha em `src/main/resources/application.properties`:
+3. Ajuste as credenciais em `application.properties`:
+   - Usuário/senha do PostgreSQL
+   - `openai.api-key` (opcional — para importação de PDFs)
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/layoutgenerator
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
+### Docker Compose
+
+Configure as credenciais diretamente no `docker-compose.yml` (veja `docker-compose.example.yml`).
 
 As tabelas são criadas automaticamente pelo Hibernate (`ddl-auto=update`).
 
@@ -38,15 +82,81 @@ As tabelas são criadas automaticamente pelo Hibernate (`ddl-auto=update`).
 
 ## Como rodar
 
+### Opção 1: Docker Compose (recomendado)
+
+1. Copie os arquivos de exemplo:
+
+```bash
+cp docker-compose.example.yml docker-compose.yml
+```
+
+2. Edite o `docker-compose.yml` com sua `OPENAI_API_KEY` (se for usar importação de PDFs)
+
+3. Suba os serviços:
+
+```bash
+docker compose up --build
+```
+
+| Serviço   | URL                        |
+|-----------|----------------------------|
+| Frontend  | http://localhost:3000      |
+| Backend   | http://localhost:8080      |
+| PostgreSQL| localhost:5432             |
+
+Para parar:
+
+```bash
+docker compose down
+```
+
+### Opção 2: Execução local
+
+1. Configure o `application.properties` (veja seção Configuração acima)
+2. Inicie o PostgreSQL (porta 5432)
+3. Execute o backend:
+
 ```bash
 mvn spring-boot:run
 ```
 
-A aplicação fica disponível em **http://localhost:8080/api**.
+4. Execute o frontend (opcional):
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+O backend fica disponível em **http://localhost:8080** e o frontend em **http://localhost:5173** (modo dev).
+
+---
+
+## Frontend
+
+O frontend oferece uma interface visual para todas as operações da API:
+
+### Páginas
+
+| Página      | Funcionalidade                                          |
+|-------------|--------------------------------------------------------|
+| **Layouts** | CRUD de layouts, registros e campos. Importação de PDFs |
+| **Converter** | Geração e parsing de registros posicionais            |
+
+### Funcionalidades
+
+- Criar, editar e excluir layouts
+- Adicionar múltiplos registros por layout (Header, Detalhe, Trailer)
+- Configurar campos com tipo, preenchimento e valor default
+- Testar geração de registros diretamente na interface
+- Importar layouts a partir de PDFs (integração OpenAI)
+- Converter JSON → registro posicional e vice-versa
 
 ---
 
 ## Endpoints
+
+### CRUD de Layouts
 
 | Método | Endpoint                          | Descrição                                |
 |--------|-----------------------------------|------------------------------------------|
@@ -56,55 +166,121 @@ A aplicação fica disponível em **http://localhost:8080/api**.
 | GET    | `/api/layouts/nome/{nome}`        | Buscar layout por nome                   |
 | PUT    | `/api/layouts/{id}`               | Atualizar layout                         |
 | DELETE | `/api/layouts/{id}`               | Deletar layout                           |
-| POST   | `/api/layouts/gerar-registro`     | Gerar registro posicional a partir de um layout |
+
+### Geração e Parsing de Registros
+
+| Método | Endpoint                          | Descrição                                |
+|--------|-----------------------------------|------------------------------------------|
+| POST   | `/api/layouts/gerar-registro`     | Gerar registro posicional                |
+| POST   | `/api/layouts/parsear-registro`   | Parsear registro para JSON               |
+
+### Importação via PDF (OpenAI)
+
+| Método | Endpoint                          | Descrição                                |
+|--------|-----------------------------------|------------------------------------------|
+| POST   | `/api/layouts/importar-pdf`       | Extrair layout do PDF (preview)          |
+| POST   | `/api/layouts/importar-pdf/salvar`| Extrair e salvar layout do PDF           |
 
 ---
 
 ## Exemplos de requisição
 
-### 1. Criar layout (CNAB240 Header de Arquivo)
+### 1. Criar layout com múltiplos registros
 
 ```http
 POST /api/layouts
 Content-Type: application/json
 
 {
-  "nome": "CNAB240_HeaderArquivo",
-  "descricao": "Header de arquivo CNAB 240",
-  "campos": [
+  "nome": "CNAB_240",
+  "descricao": "Layout CNAB 240 caracteres",
+  "registros": [
     {
-      "nome": "codigoBanco",
-      "posicaoInicial": 1,
-      "posicaoFinal": 3,
-      "tipo": "NUMERICO",
-      "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true
+      "nome": "HEADER_ARQUIVO",
+      "descricao": "Header do arquivo",
+      "codigo": "0",
+      "campos": [
+        {
+          "nome": "codigo_banco",
+          "posicaoInicial": 1,
+          "posicaoFinal": 3,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true
+        },
+        {
+          "nome": "lote_servico",
+          "posicaoInicial": 4,
+          "posicaoFinal": 7,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true,
+          "valorDefault": "0000"
+        },
+        {
+          "nome": "tipo_registro",
+          "posicaoInicial": 8,
+          "posicaoFinal": 8,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true,
+          "valorDefault": "0"
+        },
+        {
+          "nome": "nome_empresa",
+          "posicaoInicial": 9,
+          "posicaoFinal": 38,
+          "tipo": "ALFANUMERICO",
+          "preenchimento": "ESPACO_DIREITA",
+          "obrigatorio": true
+        }
+      ]
     },
     {
-      "nome": "loteServico",
-      "posicaoInicial": 4,
-      "posicaoFinal": 7,
-      "tipo": "NUMERICO",
-      "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true,
-      "valorDefault": "0"
+      "nome": "DETALHE",
+      "descricao": "Registro de detalhe",
+      "codigo": "3",
+      "campos": [
+        {
+          "nome": "codigo_banco",
+          "posicaoInicial": 1,
+          "posicaoFinal": 3,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true
+        },
+        {
+          "nome": "valor",
+          "posicaoInicial": 4,
+          "posicaoFinal": 18,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true
+        }
+      ]
     },
     {
-      "nome": "tipoRegistro",
-      "posicaoInicial": 8,
-      "posicaoFinal": 8,
-      "tipo": "NUMERICO",
-      "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true,
-      "valorDefault": "0"
-    },
-    {
-      "nome": "nomeEmpresa",
-      "posicaoInicial": 9,
-      "posicaoFinal": 38,
-      "tipo": "ALFANUMERICO",
-      "preenchimento": "ESPACO_DIREITA",
-      "obrigatorio": true
+      "nome": "TRAILER_ARQUIVO",
+      "descricao": "Trailer do arquivo",
+      "codigo": "9",
+      "campos": [
+        {
+          "nome": "codigo_banco",
+          "posicaoInicial": 1,
+          "posicaoFinal": 3,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true
+        },
+        {
+          "nome": "qtd_registros",
+          "posicaoInicial": 4,
+          "posicaoFinal": 9,
+          "tipo": "NUMERICO",
+          "preenchimento": "ZERO_ESQUERDA",
+          "obrigatorio": true
+        }
+      ]
     }
   ]
 }
@@ -114,19 +290,18 @@ Content-Type: application/json
 
 ---
 
-### 2. Gerar registro
+### 2. Gerar registro especificando layout e tipo de registro
 
 ```http
 POST /api/layouts/gerar-registro
 Content-Type: application/json
 
 {
-  "nomeLayout": "CNAB240_HeaderArquivo",
+  "nomeLayout": "CNAB_240",
+  "nomeRegistro": "HEADER_ARQUIVO",
   "valores": {
-    "codigoBanco": "341",
-    "loteServico": "1",
-    "tipoRegistro": "0",
-    "nomeEmpresa": "EMPRESA TESTE LTDA"
+    "codigo_banco": "341",
+    "nome_empresa": "EMPRESA TESTE LTDA"
   }
 }
 ```
@@ -135,125 +310,12 @@ Content-Type: application/json
 
 ```json
 {
-  "registroGerado": "34100010EMPRESA TESTE LTDA            ",
-  "campos": [
-    {
-      "nome": "codigoBanco",
-      "posicao": "1-3",
-      "valorOriginal": "341",
-      "valorFormatado": "341"
-    },
-    {
-      "nome": "loteServico",
-      "posicao": "4-7",
-      "valorOriginal": "1",
-      "valorFormatado": "0001"
-    },
-    {
-      "nome": "tipoRegistro",
-      "posicao": "8-8",
-      "valorOriginal": "0",
-      "valorFormatado": "0"
-    },
-    {
-      "nome": "nomeEmpresa",
-      "posicao": "9-38",
-      "valorOriginal": "EMPRESA TESTE LTDA",
-      "valorFormatado": "EMPRESA TESTE LTDA            "
-    }
-  ],
-  "tamanhoTotal": 38
-}
-```
-
----
-
-### 3. Exemplo de erro — campo obrigatório ausente
-
-```http
-POST /api/layouts/gerar-registro
-Content-Type: application/json
-
-{
-  "nomeLayout": "CNAB240_HeaderArquivo",
-  "valores": {
-    "codigoBanco": "341"
-  }
-}
-```
-
-**Resposta (400 Bad Request):**
-
-```json
-{
-  "titulo": "Erro de validação",
-  "erro": "Campo obrigatório não fornecido ou vazio: 'loteServico'.",
-  "status": 400,
-  "timestamp": "2026-02-04T10:00:00.000"
-}
-```
-
----
-
-### 4. Exemplo de erro — valor excede tamanho
-
-```http
-POST /api/layouts/gerar-registro
-Content-Type: application/json
-
-{
-  "nomeLayout": "CNAB240_HeaderArquivo",
-  "valores": {
-    "codigoBanco": "1234",
-    "loteServico": "1",
-    "tipoRegistro": "0",
-    "nomeEmpresa": "TESTE"
-  }
-}
-```
-
-**Resposta (400 Bad Request):**
-
-```json
-{
-  "titulo": "Erro de validação",
-  "erro": "Campo 'codigoBanco': valor excede o tamanho máximo permitido. Máximo: 3 caractere(s), fornecido: 4 caractere(s). Valor: '1234'.",
-  "status": 400,
-  "timestamp": "..."
-}
-```
-
----
-
-### 5. Exemplo com valorDefault
-
-Os campos `loteServico` e `tipoRegistro` têm `valorDefault` definido no layout.
-Omitindo-os da requisição, o default é aplicado automaticamente:
-
-```http
-POST /api/layouts/gerar-registro
-Content-Type: application/json
-
-{
-  "nomeLayout": "CNAB240_HeaderArquivo",
-  "valores": {
-    "codigoBanco": "341",
-    "nomeEmpresa": "EMPRESA TESTE LTDA"
-  }
-}
-```
-
-**Resposta (200 OK):** `loteServico` e `tipoRegistro` recebem `"0"` pelo default.
-O campo `valorOriginal` na resposta mostra o valor efetivo utilizado (fornecido pelo cliente ou aplicado pelo default).
-
-```json
-{
   "registroGerado": "34100000EMPRESA TESTE LTDA            ",
   "campos": [
-    { "nome": "codigoBanco",  "posicao": "1-3",  "valorOriginal": "341", "valorFormatado": "341"  },
-    { "nome": "loteServico",  "posicao": "4-7",  "valorOriginal": "0",   "valorFormatado": "0000" },
-    { "nome": "tipoRegistro", "posicao": "8-8",  "valorOriginal": "0",   "valorFormatado": "0"    },
-    { "nome": "nomeEmpresa",  "posicao": "9-38", "valorOriginal": "EMPRESA TESTE LTDA", "valorFormatado": "EMPRESA TESTE LTDA            " }
+    { "nome": "codigo_banco",  "posicao": "1-3",  "valorOriginal": "341", "valorFormatado": "341"  },
+    { "nome": "lote_servico",  "posicao": "4-7",  "valorOriginal": "0000", "valorFormatado": "0000" },
+    { "nome": "tipo_registro", "posicao": "8-8",  "valorOriginal": "0",   "valorFormatado": "0"    },
+    { "nome": "nome_empresa",  "posicao": "9-38", "valorOriginal": "EMPRESA TESTE LTDA", "valorFormatado": "EMPRESA TESTE LTDA            " }
   ],
   "tamanhoTotal": 38
 }
@@ -261,22 +323,99 @@ O campo `valorOriginal` na resposta mostra o valor efetivo utilizado (fornecido 
 
 ---
 
-### 6. Exemplo de erro — campo desconhecido
+### 3. Gerar registro por ID do registro
 
-Qualquer chave no map `valores` que não corresponda a um campo do layout é rejeitada — previne typos silenciosos:
+Se você já conhece o ID do registro no banco, pode usar diretamente:
 
 ```http
 POST /api/layouts/gerar-registro
 Content-Type: application/json
 
 {
-  "nomeLayout": "CNAB240_HeaderArquivo",
+  "idRegistro": 1,
   "valores": {
-    "codigoBanco": "341",
-    "loteServico": "1",
-    "tipoRegistro": "0",
-    "nomeEmpresa": "TESTE",
-    "campo_inexistente": "valor"
+    "codigo_banco": "341",
+    "nome_empresa": "ACME Ltda"
+  }
+}
+```
+
+---
+
+### 4. Parsear registro (converter de posicional para JSON)
+
+```http
+POST /api/layouts/parsear-registro
+Content-Type: application/json
+
+{
+  "nomeLayout": "CNAB_240",
+  "nomeRegistro": "HEADER_ARQUIVO",
+  "registro": "34100000ACME Ltda                     "
+}
+```
+
+**Resposta (200 OK):**
+
+```json
+{
+  "valores": {
+    "codigo_banco": "341",
+    "lote_servico": "0000",
+    "tipo_registro": "0",
+    "nome_empresa": "ACME Ltda"
+  }
+}
+```
+
+O parsing remove automaticamente o padding:
+- `ZERO_ESQUERDA`: remove zeros à esquerda (preserva "0" se for só zeros)
+- `ESPACO_DIREITA`: remove espaços à direita
+- `ESPACO_ESQUERDA`: remove espaços à esquerda
+
+---
+
+### 5. Importar layout de PDF (usando OpenAI)
+
+**Preview (não salva):**
+
+```http
+POST /api/layouts/importar-pdf
+Content-Type: multipart/form-data
+
+arquivo: [arquivo.pdf]
+nomeLayout: LAYOUT_SOFTWARE_EXPRESS
+```
+
+**Importar e salvar:**
+
+```http
+POST /api/layouts/importar-pdf/salvar
+Content-Type: multipart/form-data
+
+arquivo: [arquivo.pdf]
+nomeLayout: LAYOUT_SOFTWARE_EXPRESS
+```
+
+O OpenAI analisa o PDF e extrai automaticamente:
+- Tipos de registro (Header, Detalhe, Trailer, etc.)
+- Campos com posições, tipos e preenchimentos
+- Valores default quando mencionados na documentação
+
+---
+
+### 6. Erro — layout com múltiplos registros sem especificar qual
+
+Se o layout tem mais de um registro, é obrigatório informar `nomeRegistro` ou `idRegistro`:
+
+```http
+POST /api/layouts/gerar-registro
+Content-Type: application/json
+
+{
+  "nomeLayout": "CNAB_240",
+  "valores": {
+    "codigo_banco": "341"
   }
 }
 ```
@@ -286,46 +425,8 @@ Content-Type: application/json
 ```json
 {
   "titulo": "Erro de validação",
-  "erro": "Campos não encontrados no layout: [campo_inexistente]. Campos disponíveis: [codigoBanco, loteServico, nomeEmpresa, tipoRegistro].",
-  "status": 400,
-  "timestamp": "..."
-}
-```
-
----
-
-### 7. Exemplo de erro — valorDefault inválido na definição do layout
-
-O `valorDefault` é validado contra tamanho e tipo no momento da criação ou atualização do layout:
-
-```http
-POST /api/layouts
-Content-Type: application/json
-
-{
-  "nome": "LayoutTeste",
-  "campos": [
-    {
-      "nome": "codigo",
-      "posicaoInicial": 1,
-      "posicaoFinal": 3,
-      "tipo": "NUMERICO",
-      "preenchimento": "ZERO_ESQUERDA",
-      "obrigatorio": true,
-      "valorDefault": "abc"
-    }
-  ]
-}
-```
-
-**Resposta (400 Bad Request):**
-
-```json
-{
-  "titulo": "Erro de validação",
-  "erro": "Campo 'codigo': valorDefault 'abc' é inválido para tipo NUMERICO (apenas dígitos 0-9).",
-  "status": 400,
-  "timestamp": "..."
+  "erro": "Layout possui múltiplos registros. É necessário especificar idRegistro ou nomeRegistro.",
+  "status": 400
 }
 ```
 
@@ -347,14 +448,39 @@ Content-Type: application/json
 | ESPACO_DIREITA  | Preenche com espaço à direita (alinha à esquerda)    | `42    `                             |
 | ESPACO_ESQUERDA | Preenche com espaço à esquerda (alinha à direita)    | `    42`                             |
 
+---
+
 ## Validações implementadas
 
 - **Tamanho do campo:** valor maior que o permitido → 400
 - **Tipo de dado:** letra em campo NUMERICO, string não-numérica em DECIMAL → 400
 - **Campo obrigatório:** ausente ou vazio e sem `valorDefault` configurado → 400
-- **Campo desconhecido:** chave no map `valores` que não existe no layout → 400
+- **Campo desconhecido:** chave no map `valores` que não existe no registro → 400
 - **valorDefault:** validado contra tamanho e tipo na criação/atualização do layout → 400
 - **DECIMAL negativo com ZERO_ESQUERDA:** preenchimento com zero à esquerda não aceita valores negativos → 400
 - **Sobreposição de posições:** campos com posições que se sobrepõem ao criar/atualizar layout → 400
 - **Posições válidas:** `posicaoInicial` deve ser ≤ `posicaoFinal` e ≥ 1 → 400
 - **Nome único:** dois layouts com o mesmo nome → 400
+- **Registro muito curto:** ao parsear, o registro deve ter pelo menos o tamanho esperado → 400
+
+---
+
+## Tecnologias
+
+### Backend
+- **Spring Boot 3.3.6**
+- **PostgreSQL** (banco de dados)
+- **uniVocity-parsers** (geração de arquivos posicionais)
+- **MapStruct** (mapeamento DTO ↔ Entity)
+- **PDFBox 3.0.1** (extração de texto de PDFs)
+- **OpenAI Java SDK** (interpretação de layouts via GPT-4)
+
+### Frontend
+- **React 18** + **Vite**
+- **Material UI (MUI)** (componentes visuais)
+- **React Router** (navegação SPA)
+- **Axios** (requisições HTTP)
+
+### Infraestrutura
+- **Docker** + **Docker Compose**
+- **Nginx** (servidor do frontend em produção)

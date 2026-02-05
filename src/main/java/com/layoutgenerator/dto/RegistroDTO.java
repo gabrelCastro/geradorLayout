@@ -2,8 +2,9 @@ package com.layoutgenerator.dto;
 
 import java.util.List;
 
-public record LayoutDTO(
+public record RegistroDTO(
         String nome,
         String descricao,
-        List<RegistroDTO> registros
+        String codigo,
+        List<CampoDTO> campos
 ) {}

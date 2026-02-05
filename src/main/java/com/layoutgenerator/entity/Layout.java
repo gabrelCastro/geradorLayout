@@ -21,9 +21,9 @@ public class Layout {
     private String descricao;
 
     @OneToMany(mappedBy = "layout", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @OrderBy("posicaoInicial ASC")
+    @OrderBy("id ASC")
     @JsonManagedReference
-    private List<Campo> campos = new ArrayList<>();
+    private List<Registro> registros = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -49,11 +49,11 @@ public class Layout {
         this.descricao = descricao;
     }
 
-    public List<Campo> getCampos() {
-        return campos;
+    public List<Registro> getRegistros() {
+        return registros;
     }
 
-    public void setCampos(List<Campo> campos) {
-        this.campos = campos;
+    public void setRegistros(List<Registro> registros) {
+        this.registros = registros;
     }
 }

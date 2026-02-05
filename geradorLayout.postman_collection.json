@@ -17,7 +17,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Layout CNAB 240\",\n  \"descricao\": \"Layout de retorno CNAB 240 caracteres\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true,\n      \"valorDefault\": \"0\"\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false,\n      \"valorDefault\": \"EMPRESA PADRAO\"\n    }\n  ]\n}",
+              "raw": "{\n  \"nome\": \"CNAB_240\",\n  \"descricao\": \"Layout CNAB 240 caracteres\",\n  \"registros\": [\n    {\n      \"nome\": \"HEADER_ARQUIVO\",\n      \"descricao\": \"Header do arquivo\",\n      \"codigo\": \"0\",\n      \"campos\": [\n        {\n          \"nome\": \"codigo_banco\",\n          \"posicaoInicial\": 1,\n          \"posicaoFinal\": 3,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        },\n        {\n          \"nome\": \"lote_servico\",\n          \"posicaoInicial\": 4,\n          \"posicaoFinal\": 7,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"0000\"\n        },\n        {\n          \"nome\": \"tipo_registro\",\n          \"posicaoInicial\": 8,\n          \"posicaoFinal\": 8,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"0\"\n        },\n        {\n          \"nome\": \"nome_empresa\",\n          \"posicaoInicial\": 9,\n          \"posicaoFinal\": 38,\n          \"tipo\": \"ALFANUMERICO\",\n          \"preenchimento\": \"ESPACO_DIREITA\",\n          \"obrigatorio\": true\n        }\n      ]\n    },\n    {\n      \"nome\": \"DETALHE\",\n      \"descricao\": \"Registro de detalhe\",\n      \"codigo\": \"3\",\n      \"campos\": [\n        {\n          \"nome\": \"codigo_banco\",\n          \"posicaoInicial\": 1,\n          \"posicaoFinal\": 3,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        },\n        {\n          \"nome\": \"lote_servico\",\n          \"posicaoInicial\": 4,\n          \"posicaoFinal\": 7,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        },\n        {\n          \"nome\": \"tipo_registro\",\n          \"posicaoInicial\": 8,\n          \"posicaoFinal\": 8,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"3\"\n        },\n        {\n          \"nome\": \"valor\",\n          \"posicaoInicial\": 9,\n          \"posicaoFinal\": 23,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        }\n      ]\n    },\n    {\n      \"nome\": \"TRAILER_ARQUIVO\",\n      \"descricao\": \"Trailer do arquivo\",\n      \"codigo\": \"9\",\n      \"campos\": [\n        {\n          \"nome\": \"codigo_banco\",\n          \"posicaoInicial\": 1,\n          \"posicaoFinal\": 3,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        },\n        {\n          \"nome\": \"lote_servico\",\n          \"posicaoInicial\": 4,\n          \"posicaoFinal\": 7,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"9999\"\n        },\n        {\n          \"nome\": \"tipo_registro\",\n          \"posicaoInicial\": 8,\n          \"posicaoFinal\": 8,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"9\"\n        },\n        {\n          \"nome\": \"qtd_registros\",\n          \"posicaoInicial\": 9,\n          \"posicaoFinal\": 14,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        }\n      ]\n    }\n  ]\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -76,7 +76,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nome\": \"Layout CNAB 240 – atualizado\",\n  \"descricao\": \"Descrição atualizada\",\n  \"campos\": [\n    {\n      \"nome\": \"codigo_registro\",\n      \"posicaoInicial\": 1,\n      \"posicaoFinal\": 3,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true,\n      \"valorDefault\": \"0\"\n    },\n    {\n      \"nome\": \"codigo_banco\",\n      \"posicaoInicial\": 4,\n      \"posicaoFinal\": 6,\n      \"tipo\": \"NUMERICO\",\n      \"preenchimento\": \"ZERO_ESQUERDA\",\n      \"obrigatorio\": true\n    },\n    {\n      \"nome\": \"nome_empresa\",\n      \"posicaoInicial\": 7,\n      \"posicaoFinal\": 26,\n      \"tipo\": \"ALFANUMERICO\",\n      \"preenchimento\": \"ESPACO_DIREITA\",\n      \"obrigatorio\": false,\n      \"valorDefault\": \"EMPRESA PADRAO\"\n    }\n  ]\n}",
+              "raw": "{\n  \"nome\": \"CNAB_240_ATUALIZADO\",\n  \"descricao\": \"Layout CNAB 240 atualizado\",\n  \"registros\": [\n    {\n      \"nome\": \"HEADER_ARQUIVO\",\n      \"descricao\": \"Header do arquivo\",\n      \"codigo\": \"0\",\n      \"campos\": [\n        {\n          \"nome\": \"codigo_banco\",\n          \"posicaoInicial\": 1,\n          \"posicaoFinal\": 3,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true\n        },\n        {\n          \"nome\": \"tipo_registro\",\n          \"posicaoInicial\": 4,\n          \"posicaoFinal\": 4,\n          \"tipo\": \"NUMERICO\",\n          \"preenchimento\": \"ZERO_ESQUERDA\",\n          \"obrigatorio\": true,\n          \"valorDefault\": \"0\"\n        }\n      ]\n    }\n  ]\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -106,7 +106,7 @@
       "name": "Geração de registro",
       "item": [
         {
-          "name": "Gerar registro por ID do layout",
+          "name": "Gerar registro por ID do layout e nome do registro",
           "request": {
             "method": "POST",
             "header": [
@@ -114,7 +114,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
+              "raw": "{\n  \"idLayout\": 1,\n  \"nomeRegistro\": \"HEADER_ARQUIVO\",\n  \"valores\": {\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -126,7 +126,7 @@
           "response": []
         },
         {
-          "name": "Gerar registro por nome do layout",
+          "name": "Gerar registro por nome do layout e nome do registro",
           "request": {
             "method": "POST",
             "header": [
@@ -134,7 +134,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nomeLayout\": \"Layout CNAB 240\",\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
+              "raw": "{\n  \"nomeLayout\": \"CNAB_240\",\n  \"nomeRegistro\": \"DETALHE\",\n  \"valores\": {\n    \"codigo_banco\": \"341\",\n    \"lote_servico\": \"0001\",\n    \"valor\": \"123456789012345\"\n  }\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -146,7 +146,7 @@
           "response": []
         },
         {
-          "name": "Gerar registro usando defaults",
+          "name": "Gerar registro por ID do registro",
           "request": {
             "method": "POST",
             "header": [
@@ -154,7 +154,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_banco\": \"341\"\n  }\n}",
+              "raw": "{\n  \"idRegistro\": 1,\n  \"valores\": {\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\"\n  }\n}",
               "options": { "language": "json" }
             },
             "url": {
@@ -166,7 +166,7 @@
           "response": []
         },
         {
-          "name": "Erro – campo desconhecido no layout",
+          "name": "Gerar registro TRAILER com defaults",
           "request": {
             "method": "POST",
             "header": [
@@ -174,13 +174,139 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idLayout\": 1,\n  \"valores\": {\n    \"codigo_registro\": \"1\",\n    \"codigo_banco\": \"341\",\n    \"nome_empresa\": \"ACME Ltda\",\n    \"campo_inexistente\": \"valor\"\n  }\n}",
+              "raw": "{\n  \"nomeLayout\": \"CNAB_240\",\n  \"nomeRegistro\": \"TRAILER_ARQUIVO\",\n  \"valores\": {\n    \"codigo_banco\": \"341\",\n    \"qtd_registros\": \"100\"\n  }\n}",
               "options": { "language": "json" }
             },
             "url": {
               "raw": "{{baseUrl}}/layouts/gerar-registro",
               "host": ["{{baseUrl}}"],
               "path": ["layouts", "gerar-registro"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parsing de registro",
+      "item": [
+        {
+          "name": "Parsear registro por nome do layout e registro",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeLayout\": \"CNAB_240\",\n  \"nomeRegistro\": \"HEADER_ARQUIVO\",\n  \"registro\": \"34100000ACME Ltda                     \"\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/parsear-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "parsear-registro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parsear registro por ID do registro",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idRegistro\": 2,\n  \"registro\": \"34100013000000123456789\"\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/parsear-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "parsear-registro"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parsear registro TRAILER",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nomeLayout\": \"CNAB_240\",\n  \"nomeRegistro\": \"TRAILER_ARQUIVO\",\n  \"registro\": \"34199999000100\"\n}",
+              "options": { "language": "json" }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/parsear-registro",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "parsear-registro"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Importação via PDF (OpenAI)",
+      "item": [
+        {
+          "name": "Extrair layout do PDF (preview)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "nomeLayout",
+                  "value": "LAYOUT_IMPORTADO",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/importar-pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "importar-pdf"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Importar e salvar layout do PDF",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "nomeLayout",
+                  "value": "LAYOUT_IMPORTADO",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/layouts/importar-pdf/salvar",
+              "host": ["{{baseUrl}}"],
+              "path": ["layouts", "importar-pdf", "salvar"]
             }
           },
           "response": []
@@ -201,7 +327,7 @@
     },
     {
       "key": "layoutNome",
-      "value": "Layout CNAB 240",
+      "value": "CNAB_240",
       "type": "string"
     }
   ]

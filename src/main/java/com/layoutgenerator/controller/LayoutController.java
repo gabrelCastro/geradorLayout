@@ -1,13 +1,15 @@
 package com.layoutgenerator.controller;
 
-import com.layoutgenerator.dto.GerarRegistroRequest;
-import com.layoutgenerator.dto.GerarRegistroResponse;
-import com.layoutgenerator.dto.LayoutDTO;
+import com.layoutgenerator.dto.*;
 import com.layoutgenerator.entity.Layout;
 import com.layoutgenerator.service.LayoutService;
+import com.layoutgenerator.service.OpenAiService;
+import com.layoutgenerator.service.PdfExtractorService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,9 +18,15 @@ import java.util.List;
 public class LayoutController {
 
     private final LayoutService layoutService;
+    private final PdfExtractorService pdfExtractorService;
+    private final OpenAiService openAiService;
 
-    public LayoutController(LayoutService layoutService) {
+    public LayoutController(LayoutService layoutService,
+                            PdfExtractorService pdfExtractorService,
+                            OpenAiService openAiService) {
         this.layoutService = layoutService;
+        this.pdfExtractorService = pdfExtractorService;
+        this.openAiService = openAiService;
     }
 
     // --- Criar layout ---
@@ -70,5 +78,33 @@ public class LayoutController {
     @PostMapping("/gerar-registro")
     public ResponseEntity<GerarRegistroResponse> gerarRegistro(@RequestBody GerarRegistroRequest request) {
         return ResponseEntity.ok(layoutService.gerarRegistro(request));
+    }
+
+    // --- Parsear registro posicional (inverso: layout → JSON) ---
+
+    @PostMapping("/parsear-registro")
+    public ResponseEntity<ParseRegistroResponse> parsearRegistro(@RequestBody ParseRegistroRequest request) {
+        return ResponseEntity.ok(layoutService.parsearRegistro(request));
+    }
+
+    // --- Importar layout a partir de PDF (usando OpenAI) ---
+
+    @PostMapping(value = "/importar-pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<LayoutDTO> extrairLayoutDoPdf(
+            @RequestParam("arquivo") MultipartFile arquivo,
+            @RequestParam("nomeLayout") String nomeLayout) {
+        String textoPdf = pdfExtractorService.extrairTexto(arquivo);
+        LayoutDTO layoutExtraido = openAiService.extrairLayoutDoPdf(textoPdf, nomeLayout);
+        return ResponseEntity.ok(layoutExtraido);
+    }
+
+    @PostMapping(value = "/importar-pdf/salvar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Layout> importarLayoutDoPdf(
+            @RequestParam("arquivo") MultipartFile arquivo,
+            @RequestParam("nomeLayout") String nomeLayout) {
+        String textoPdf = pdfExtractorService.extrairTexto(arquivo);
+        LayoutDTO layoutExtraido = openAiService.extrairLayoutDoPdf(textoPdf, nomeLayout);
+        Layout layout = layoutService.criar(layoutExtraido);
+        return ResponseEntity.status(HttpStatus.CREATED).body(layout);
     }
 }
